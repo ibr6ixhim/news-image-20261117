@@ -1,18 +1,13 @@
 #!/usr/bin/env python3
-"""
-make.fun entry: Sum up 17 November 2026 world news in one image.
-Writes /output/entry.png
-"""
+"""make.fun entry: Sum up 17 November 2026 world news in one image. Writes /output/entry.png"""
 import os
 from PIL import Image, ImageDraw, ImageFont
 
 def get_font(size, bold=False):
-    candidates = [
+    for path in [
         "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf" if bold else "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
         "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf" if bold else "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
-        "/System/Library/Fonts/Helvetica.ttc",
-    ]
-    for path in candidates:
+    ]:
         if os.path.exists(path):
             try:
                 return ImageFont.truetype(path, size)
@@ -21,73 +16,48 @@ def get_font(size, bold=False):
     return ImageFont.load_default()
 
 def main():
-    W, H = 1200, 1600
-    img = Image.new("RGB", (W, H), "#0f172a")  # dark navy
+    W, H = 1024, 1024
+    img = Image.new("RGB", (W, H), "#0f172a")
     draw = ImageDraw.Draw(img)
-
-    # Header bar
-    draw.rectangle([0, 0, W, 110], fill="#1e293b")
-    title_font = get_font(42, bold=True)
-    date_font = get_font(22)
-    draw.text((40, 28), "THE WORLD IN ONE DAY", fill="#f8fafc", font=title_font)
-    draw.text((40, 75), "Tuesday  17 November 2026  ·  Global Edition", fill="#94a3b8", font=date_font)
-
-    # Accent line
-    draw.rectangle([0, 110, W, 116], fill="#ef4444")
-
-    y = 140
-    section_font = get_font(18, bold=True)
-    body_font = get_font(20)
-    small_font = get_font(16)
-
+    draw.rectangle([0, 0, W, 80], fill="#1e293b")
+    draw.text((24, 18), "THE WORLD IN ONE DAY", fill="#f8fafc", font=get_font(28, True))
+    draw.text((24, 52), "Tuesday 17 November 2026  ·  Global Edition", fill="#94a3b8", font=get_font(14))
+    draw.rectangle([0, 80, W, 86], fill="#ef4444")
+    y = 100
     stories = [
-        ("🔴 CONFLICT", "Ukraine strikes Kerch Bridge",
-         "Ukrainian drones and missiles hit the Crimean Bridge for a second day. A section of the road span collapses into the Kerch Strait. Zelenskyy calls it an 'unprecedented operation' prepared over weeks."),
-        ("🔴 MIDDLE EAST", "Iran resumes strikes on Bahrain",
-         "Iran fires drones at a U.S. military radar system in Bahrain (Sheikh Isa base). Bahrain intercepts the attack. Third U.S. aircraft carrier arrives in the region amid rising tensions."),
-        ("🔵 DIPLOMACY", "Trump begins Asia trip",
-         "President Trump lands in the Philippines on the first leg of a three-day Asia tour. Quad leaders meet in Manila. Historic trilateral summit with Xi Jinping and Vladimir Putin planned in Shenzhen."),
-        ("🔵 GEOPOLITICS", "Third U.S. carrier to Middle East",
-         "A third American aircraft carrier arrives in the Middle East as pressure on Iran continues. Houthi forces claim drone attacks toward Saudi pipeline facilities."),
-        ("🟡 EUROPE", "EU migrant return hub in Rwanda",
-         "Germany, Austria, Denmark, Greece and the Netherlands announce a 'return hub' in Rwanda for rejected asylum seekers, planned to open in 2027. Human-rights groups condemn the plan."),
-        ("🟡 TECH / INFRA", "Digital outages & AI controls",
-         "Series of outages raise concern over digital infrastructure stability. U.S. tightens remote-access rules for overseas data centres using advanced AI chips. Nvidia scrutiny continues."),
-        ("🟢 OTHER", "Around the world",
-         "Israeli Knesset elects new speaker. Settler violence reported in West Bank. Russia–Ukraine fighting intensifies. APEC summit security tightens in Shenzhen."),
+        ("CONFLICT", "Ukraine strikes Kerch Bridge", "Ukrainian drones/missiles hit Crimean Bridge second day. Section collapses into Kerch Strait. Zelenskyy: unprecedented multi-week op."),
+        ("MIDDLE EAST", "Iran drones hit Bahrain", "Iran fires drones at US radar (Sheikh Isa base). Bahrain intercepts. 3rd US carrier arrives in region."),
+        ("DIPLOMACY", "Trump starts Asia trip", "Trump lands Philippines. Quad meets Manila. Trilateral summit with Xi + Putin planned Shenzhen."),
+        ("GEOPOLITICS", "Carrier pressure on Iran", "Third American carrier arrives Middle East. Houthis claim drones toward Saudi pipelines."),
+        ("EUROPE", "EU return hub in Rwanda", "DE/AT/DK/GR/NL announce migrant return hub in Rwanda for 2027. Rights groups condemn."),
+        ("TECH", "Outages & AI chip rules", "Digital infra outages spark concern. US tightens remote access to overseas AI data centres."),
+        ("WORLD", "Also today", "Israeli Knesset new speaker. West Bank settler violence. Russia–Ukraine intensifies. APEC security."),
     ]
-
-    for tag, headline, body in stories:
-        # Tag
-        draw.text((40, y), tag, fill="#f87171" if "🔴" in tag else ("#60a5fa" if "🔵" in tag else ("#fbbf24" if "🟡" in tag else "#4ade80")), font=section_font)
-        y += 28
-        # Headline
-        draw.text((40, y), headline, fill="#f1f5f9", font=get_font(26, bold=True))
-        y += 36
-        # Body – wrap roughly
+    colors = {"CONFLICT":"#f87171","MIDDLE EAST":"#f87171","DIPLOMACY":"#60a5fa","GEOPOLITICS":"#60a5fa","EUROPE":"#fbbf24","TECH":"#fbbf24","WORLD":"#4ade80"}
+    for tag, head, body in stories:
+        draw.text((24, y), tag, fill=colors[tag], font=get_font(12, True))
+        y += 18
+        draw.text((24, y), head, fill="#f1f5f9", font=get_font(18, True))
+        y += 24
         words = body.split()
         line = ""
         for w in words:
             test = (line + " " + w).strip()
-            if draw.textlength(test, font=body_font) < W - 80:
+            if draw.textlength(test, font=get_font(13)) < W - 48:
                 line = test
             else:
-                draw.text((40, y), line, fill="#cbd5e1", font=body_font)
-                y += 28
+                draw.text((24, y), line, fill="#cbd5e1", font=get_font(13))
+                y += 18
                 line = w
         if line:
-            draw.text((40, y), line, fill="#cbd5e1", font=body_font)
-            y += 28
-        y += 22  # gap between stories
-
-    # Footer
-    draw.rectangle([0, H - 70, W, H], fill="#1e293b")
-    draw.text((40, H - 48), "make.fun entry  ·  news-image-20261117  ·  AI-generated summary of open sources", fill="#64748b", font=small_font)
-
+            draw.text((24, y), line, fill="#cbd5e1", font=get_font(13))
+            y += 18
+        y += 12
+    draw.rectangle([0, H-40, W, H], fill="#1e293b")
+    draw.text((24, H-28), "make.fun · news-image-20261117 · open sources", fill="#64748b", font=get_font(11))
     os.makedirs("/output", exist_ok=True)
-    out_path = "/output/entry.png"
-    img.save(out_path, "PNG")
-    print(f"Wrote {out_path}")
+    img.save("/output/entry.png", "PNG", optimize=True)
+    print("Wrote /output/entry.png")
 
 if __name__ == "__main__":
     main()
